@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN" :class="{ 'dark': dark }" x-data="bookApp()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咪蒙文集 · 致每一个努力生活的你</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 50:'#ebf0f5', 100:'#d6e0eb', 200:'#adc2d9', 300:'#84a3c7',
+                                400:'#5b84b5', 500:'#3b5b7f', 600:'#1e3a5f', 700:'#15293f',
+                                800:'#0f1f30', 900:'#0a1521' },
+                        gold: { DEFAULT:'#b8860b', light:'#d4a843', dark:'#8b6508' },
+                        ink:  { DEFAULT:'#111827', light:'#4b5563', muted:'#6b7280' }
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif SC"', '"Source Han Serif SC"', '"Songti SC"', 'serif'],
+                        sans: ['-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="font-sans bg-white dark:bg-navy-900 text-ink dark:text-slate-200 transition-colors duration-300">
+
+    <div x-show="view === 'home'" class="min-h-screen">
+
+        <nav class="sticky top-0 z-50 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md border-b border-slate-200 dark:border-navy-700">
+            <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-navy-600 dark:bg-navy-400 flex items-center justify-center">
+                        <span class="text-gold font-serif font-bold text-lg">咪</span>
+                    </div>
+                    <div>
+                        <h1 class="font-serif font-bold text-navy-600 dark:text-navy-200 text-lg">咪蒙文集</h1>
+                        <p class="text-xs text-ink-muted dark:text-slate-400">致每一个努力生活的你</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button @click="dark = !dark; localStorage.setItem('dark', dark)"
+                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition">
+                        <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"/></svg>
+                        <svg x-show="dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </button>
+                    <button @click="openReader(0)"
+                            class="px-4 py-2 rounded-lg bg-navy-600 dark:bg-navy-400 text-white dark:text-navy-900 font-medium hover:bg-navy-700 dark:hover:bg-navy-300 transition">
+                        开始阅读
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="inline-block px-3 py-1 rounded-full bg-gold/10 text-gold text-sm font-medium">
+                        社科 · 生活随笔
+                    </div>
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-navy-600 dark:text-navy-200 leading-tight">
+                        咪蒙文集
+                    </h2>
+                    <p class="font-serif text-xl text-ink-muted dark:text-slate-400">
+                        致每一个努力生活的你
+                    </p>
+                    <p class="font-serif text-lg text-ink dark:text-slate-300 leading-relaxed">
+                        747 篇文章，记录了一个时代里普通人的喜怒哀乐。
+                        关于爱情、职场、亲情、自我，那些我们想说却不知如何开口的话，
+                        都在这里找到了共鸣。全部收录，按编号排序，无一遗漏。
+                    </p>
+                    <div class="flex gap-4 pt-4">
+                        <button @click="openReader(0)"
+                                class="px-6 py-3 rounded-lg bg-navy-600 dark:bg-navy-400 text-white dark:text-navy-900 font-medium hover:bg-navy-700 dark:hover:bg-navy-300 transition shadow-lg shadow-navy-600/20">
+                            开始阅读
+                        </button>
+                        <button @click="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})"
+                                class="px-6 py-3 rounded-lg border-2 border-navy-600 dark:border-navy-400 text-navy-600 dark:text-navy-400 font-medium hover:bg-navy-50 dark:hover:bg-navy-800 transition">
+                            查看目录
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <div class="w-72 h-96 rounded-xl shadow-2xl overflow-hidden border-4 border-gold/30">
+                        <img x-show="!coverError"
+                             src="assets/images/cover.svg"
+                             @error="coverError = true"
+                             alt="封面"
+                             class="w-full h-full object-cover">
+                        <div x-show="coverError" class="w-full h-full bg-gradient-to-br from-navy-700 to-navy-900 flex flex-col items-center justify-center p-8 text-center">
+                            <h3 class="font-serif text-3xl font-bold text-gold mb-4">咪蒙文集</h3>
+                            <p class="font-serif text-navy-200 text-sm">致每一个努力生活的你</p>
+                            <div class="mt-8 w-16 h-px bg-gold"></div>
+                            <p class="mt-4 text-navy-300 text-xs">747 篇 · 全部收录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-3xl mx-auto px-6 py-12">
+            <div class="bg-slate-50 dark:bg-navy-800 rounded-2xl p-8 md:p-12 border border-slate-200 dark:border-navy-700">
+                <div class="text-center mb-6">
+                    <div class="inline-block w-12 h-px bg-gold mb-4"></div>
+                    <h3 class="font-serif text-2xl font-bold text-navy-600 dark:text-navy-200">核心理念</h3>
+                </div>
+                <p class="font-serif text-lg leading-relaxed text-ink dark:text-slate-300 text-center">
+                    "所谓情商高，就是懂得好好说话。"<br><br>
+                    咪蒙的文字之所以能引发千万人的共鸣，不在于华丽的辞藻，
+                    而在于她总能用最直白的语言，说出我们心里那些
+                    <span class="text-gold font-semibold">想说却不敢说的话</span>。
+                    她写的不是鸡汤，而是这个时代里，
+                    每一个普通人真实的生活和情感。
+                </p>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-12">
+            <h3 class="font-serif text-2xl font-bold text-center text-navy-600 dark:text-navy-200 mb-8">
+                三大主题
+            </h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <template x-for="theme in themes" :key="theme.title">
+                    <div class="bg-white dark:bg-navy-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-navy-700 hover:shadow-md transition-all hover:-translate-y-1">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
+                             :class="theme.color">
+                            <span class="text-2xl" x-text="theme.icon"></span>
+                        </div>
+                        <h4 class="font-serif text-xl font-bold text-navy-600 dark:text-navy-200 mb-2" x-text="theme.title"></h4>
+                        <p class="text-ink-muted dark:text-slate-400 leading-relaxed" x-text="theme.desc"></p>
+                        <div class="mt-4 text-sm text-gold" x-text="theme.count + ' 篇文章'"></div>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-12">
+            <h3 class="font-serif text-2xl font-bold text-center text-navy-600 dark:text-navy-200 mb-8">
+                精选金句
+            </h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="quote in quotes" :key="quote">
+                    <div class="bg-slate-50 dark:bg-navy-800 rounded-xl p-6 border-l-4 border-gold">
+                        <svg class="w-8 h-8 text-gold/30 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-4.733 7-7.609 7-7.609s-1.391 5.609-5.609 5.609v9.391zm-10 0v-7.391c0-4.733 7-7.609 7-7.609s-1.391 5.609-5.609 5.609v9.391z"/></svg>
+                        <p class="font-serif text-lg leading-relaxed text-ink dark:text-slate-300" x-text="quote"></p>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <section id="catalog" class="max-w-4xl mx-auto px-6 py-12">
+            <h3 class="font-serif text-2xl font-bold text-center text-navy-600 dark:text-navy-200 mb-8">
+                目录导航
+            </h3>
+            <div class="space-y-6">
+                <template x-for="part in parts" :key="part.name">
+                    <div>
+                        <h4 class="font-serif text-lg font-bold text-gold mb-3 flex items-center gap-2">
+                            <span class="w-6 h-px bg-gold"></span>
+                            <span x-text="part.name"></span>
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <template x-for="ch in part.chapters" :key="ch.idx">
+                                <button @click="openReader(ch.idx)"
+                                        class="text-left px-4 py-3 rounded-lg bg-white dark:bg-navy-800 border border-slate-200 dark:border-navy-700 hover:border-gold hover:shadow-sm transition-all group">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-serif text-ink dark:text-slate-300 group-hover:text-navy-600 dark:group-hover:text-navy-200" x-text="ch.title"></span>
+                                        <svg class="w-4 h-4 text-slate-400 group-hover:text-gold transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <section class="max-w-4xl mx-auto px-6 py-12">
+            <div class="flex md:flex-row flex-col gap-8 items-center">
+                <div class="w-32 h-32 rounded-full bg-gradient-to-br from-navy-400 to-navy-600 flex items-center justify-center flex-shrink-0">
+                    <span class="font-serif text-4xl text-gold">咪</span>
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h3 class="font-serif text-2xl font-bold text-navy-600 dark:text-navy-200 mb-2">关于咪蒙</h3>
+                    <div class="flex flex-wrap gap-2 mb-4 justify-center md:justify-start">
+                        <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-navy-800 text-sm text-ink-muted dark:text-slate-400">自媒体人</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-navy-800 text-sm text-ink-muted dark:text-slate-400">专栏作家</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-navy-800 text-sm text-ink-muted dark:text-slate-400">百万粉丝</span>
+                    </div>
+                    <p class="font-serif text-ink-muted dark:text-slate-400 leading-relaxed">
+                        咪蒙，原名马凌，知名自媒体人。2015年至2018年间，
+                        在公众号"咪蒙"发表文章747篇，以犀利幽默的文风、
+                        贴近生活的选题引发广泛共鸣。本文集全部收录747篇文章，
+                        按编号排序，分为15个篇章，无一遗漏。
+                    </p>
+                    <div class="mt-4 flex gap-6 justify-center md:justify-start">
+                        <div class="text-center">
+                            <div class="font-serif text-2xl font-bold text-navy-600 dark:text-navy-200">747</div>
+                            <div class="text-xs text-ink-muted dark:text-slate-400">总文章数</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-serif text-2xl font-bold text-navy-600 dark:text-navy-200">747</div>
+                            <div class="text-xs text-ink-muted dark:text-slate-400">全部收录</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-serif text-2xl font-bold text-navy-600 dark:text-navy-200">15</div>
+                            <div class="text-xs text-ink-muted dark:text-slate-400">篇章分组</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="border-t border-slate-200 dark:border-navy-700 mt-12">
+            <div class="max-w-4xl mx-auto px-6 py-8 text-center">
+                <p class="font-serif text-navy-600 dark:text-navy-200 font-bold">咪蒙文集</p>
+                <p class="text-sm text-ink-muted dark:text-slate-400 mt-1">致每一个努力生活的你</p>
+                <div class="mt-4 inline-block w-16 h-px bg-gold"></div>
+                <p class="mt-4 font-serif text-sm text-ink-muted dark:text-slate-400 italic">
+                    "所谓情商高，就是懂得好好说话。"
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <div x-show="view === 'read'" class="min-h-screen flex flex-col" style="display: none;">
+
+        <div class="fixed top-0 left-0 right-0 h-1 bg-slate-200 dark:bg-navy-800 z-50">
+            <div class="h-full bg-gold transition-all duration-150" :style="`width: ${progress}%`"></div>
+        </div>
+
+        <header class="sticky top-0 z-40 bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border-b border-slate-200 dark:border-navy-700">
+            <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+                <button @click="closeReader()" class="flex items-center gap-2 text-navy-600 dark:text-navy-200 hover:text-gold transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span class="hidden md:inline">返回首页</span>
+                </button>
+                <h2 class="font-serif font-bold text-navy-600 dark:text-navy-200 truncate" x-text="currentChapter ? currentChapter.title : ''"></h2>
+                <div class="flex items-center gap-2">
+                    <button @click="dark = !dark; localStorage.setItem('dark', dark)"
+                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition">
+                        <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"/></svg>
+                        <svg x-show="dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </button>
+                    <button @click="mobileMenu = true" class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex max-w-6xl mx-auto w-full">
+            <aside class="hidden md:block w-64 flex-shrink-0 border-r border-slate-200 dark:border-navy-700 overflow-y-auto sticky top-16 h-[calc(100vh-4rem)] p-4">
+                <div class="space-y-4">
+                    <template x-for="part in parts" :key="part.name">
+                        <div>
+                            <h4 class="font-serif text-sm font-bold text-gold mb-2" x-text="part.name"></h4>
+                            <div class="space-y-1">
+                                <template x-for="ch in part.chapters" :key="ch.idx">
+                                    <button @click="loadChapter(ch.idx)"
+                                            class="w-full text-left px-3 py-2 rounded-lg text-sm transition"
+                                            :class="currentIdx === ch.idx ? 'bg-navy-600 dark:bg-navy-400 text-white dark:text-navy-900' : 'text-ink-muted dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-navy-800'"
+                                            x-text="ch.title"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </aside>
+
+            <main class="flex-1 overflow-y-auto" @scroll.throttle="updateProgress($event)">
+                <div class="max-w-[720px] mx-auto px-6 md:px-10 py-8">
+                    <div x-show="loading" class="flex items-center justify-center py-20">
+                        <div class="animate-spin rounded-full h-8 w-8 border-2 border-gold border-t-transparent"></div>
+                    </div>
+                    <div x-show="!loading" class="markdown" x-html="renderedContent"></div>
+                    <div x-show="!loading" class="mt-12 pt-8 border-t border-slate-200 dark:border-navy-700 flex justify-between items-center">
+                        <button x-show="currentIdx > 0" @click="loadChapter(currentIdx - 1)"
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-navy-700 hover:border-gold transition text-navy-600 dark:text-navy-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            上一章
+                        </button>
+                        <span class="text-sm text-ink-muted dark:text-slate-400" x-text="(currentIdx + 1) + ' / ' + chapters.length"></span>
+                        <button x-show="currentIdx < chapters.length - 1" @click="loadChapter(currentIdx + 1)"
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-navy-700 hover:border-gold transition text-navy-600 dark:text-navy-200">
+                            下一章
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div x-show="mobileMenu" @click="mobileMenu = false" class="fixed inset-0 bg-black/50 z-50 md:hidden" style="display: none;">
+        <div @click.stop class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-navy-900 p-4 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif font-bold text-navy-600 dark:text-navy-200">目录</h3>
+                <button @click="mobileMenu = false" class="p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <template x-for="part in parts" :key="part.name">
+                    <div>
+                        <h4 class="font-serif text-sm font-bold text-gold mb-2" x-text="part.name"></h4>
+                        <div class="space-y-1">
+                            <template x-for="ch in part.chapters" :key="ch.idx">
+                                <button @click="loadChapter(ch.idx); mobileMenu = false"
+                                        class="w-full text-left px-3 py-2 rounded-lg text-sm transition"
+                                        :class="currentIdx === ch.idx ? 'bg-navy-600 dark:bg-navy-400 text-white dark:text-navy-900' : 'text-ink-muted dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-navy-800'"
+                                        x-text="ch.title"></button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function bookApp() {
+            return {
+                view: 'home',
+                dark: localStorage.getItem('dark') === 'true',
+                coverError: false,
+                mobileMenu: false,
+                loading: false,
+                currentIdx: 0,
+                renderedContent: '',
+                progress: 0,
+                chapterCache: {},
+                chapters: [],
+                themes: [
+                    { title: '情感篇', icon: '❤', desc: '关于爱情、暧昧、异地恋——那些纠结的心事，其实都有答案。', count: 249, color: 'bg-red-100 dark:bg-red-900/30' },
+                    { title: '职场篇', icon: '💼', desc: '关于情商、赚钱、职场生存——成年人世界里最真实的规则。', count: 249, color: 'bg-blue-100 dark:bg-blue-900/30' },
+                    { title: '生活篇', icon: '🌱', desc: '关于自我、失去、成长——与自己和解，是终身必修课。', count: 249, color: 'bg-green-100 dark:bg-green-900/30' },
+                ],
+                quotes: [
+                    '所谓情商高，就是懂得好好说话。',
+                    '你明明配得上更好的生活。',
+                    '可以坚强，但不必逞强。',
+                    '我不讨好世界，我只讨好自己。',
+                    '别扯了，这世上根本就没有怀才不遇。',
+                    '你过得不好，因为你太听话了。',
+                ],
+                parts: {},
+
+                async init() {
+                    try {
+                        const resp = await fetch('chapters.json');
+                        const data = await resp.json();
+                        this.chapters = data.chapters;
+
+                        const grouped = {};
+                        this.chapters.forEach(ch => {
+                            if (!grouped[ch.part]) grouped[ch.part] = [];
+                            grouped[ch.part].push(ch);
+                        });
+                        this.parts = grouped;
+                    } catch (e) {
+                        console.error('加载章节配置失败:', e);
+                    }
+
+                    const hash = window.location.hash;
+                    if (hash.startsWith('#chapter-')) {
+                        const idx = parseInt(hash.replace('#chapter-', ''));
+                        if (idx >= 0 && idx < this.chapters.length) {
+                            this.openReader(idx);
+                        }
+                    }
+                },
+
+                get currentChapter() {
+                    return this.chapters[this.currentIdx] || null;
+                },
+
+                async openReader(idx) {
+                    this.view = 'read';
+                    await this.loadChapter(idx);
+                },
+
+                closeReader() {
+                    this.view = 'home';
+                    window.location.hash = '';
+                    window.scrollTo(0, 0);
+                },
+
+                async loadChapter(idx) {
+                    if (idx < 0 || idx >= this.chapters.length) return;
+                    this.currentIdx = idx;
+                    const ch = this.chapters[idx];
+                    window.location.hash = `chapter-${idx}`;
+
+                    if (this.chapterCache[idx]) {
+                        this.renderedContent = this.chapterCache[idx];
+                        this.scrollToTop();
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        const resp = await fetch(ch.file);
+                        let text = await resp.text();
+                        text = text.replace(/^# .+\n/, '');
+                        this.renderedContent = marked.parse(text);
+                        this.chapterCache[idx] = this.renderedContent;
+                        this.preloadChapter(idx + 1);
+                    } catch (e) {
+                        this.renderedContent = '<p>章节加载失败，请稍后重试。</p>';
+                    }
+                    this.loading = false;
+                    this.scrollToTop();
+                },
+
+                async preloadChapter(idx) {
+                    if (idx < 0 || idx >= this.chapters.length) return;
+                    if (this.chapterCache[idx]) return;
+                    try {
+                        const resp = await fetch(this.chapters[idx].file);
+                        let text = await resp.text();
+                        text = text.replace(/^# .+\n/, '');
+                        this.chapterCache[idx] = marked.parse(text);
+                    } catch (e) {}
+                },
+
+                scrollToTop() {
+                    this.$nextTick(() => {
+                        const main = document.querySelector('main');
+                        if (main) main.scrollTop = 0;
+                    });
+                },
+
+                updateProgress(e) {
+                    const el = e.target;
+                    const max = el.scrollHeight - el.clientHeight;
+                    this.progress = max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

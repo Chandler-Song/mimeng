@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv/
+
+# 临时文件
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+server_log.txt
+extract.log
+extract_error.log
+
+# 系统文件
+Thumbs.db
+.DS_Store
+desktop.ini
+ehthumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 构建产物
+.next/
+out/
+.cache/
+
+# 进度文件（部署后不需要）
+articles/progress.json
+
+# 原始PDF（太大，不纳入版本控制）
+*.pdf
+
+# CodeArts 内部文件
+.codeartsdoer/

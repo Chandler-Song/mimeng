@@ -1,0 +1,187 @@
+:root {
+    --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+    --font-sans: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body {
+    font-family: var(--font-sans);
+}
+
+.markdown {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.85;
+    color: #111827;
+}
+
+.dark .markdown {
+    color: #e2e8f0;
+}
+
+.markdown h1 {
+    font-size: 1.75em;
+    font-weight: 700;
+    color: #1e3a5f;
+    border-bottom: 2px solid #b8860b;
+    padding-bottom: 0.5em;
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+}
+
+.dark .markdown h1 {
+    color: #adc2d9;
+}
+
+.markdown h2 {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #1e3a5f;
+    margin-top: 1.2em;
+    margin-bottom: 0.8em;
+}
+
+.dark .markdown h2 {
+    color: #adc2d9;
+}
+
+.markdown h3 {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #3b5b7f;
+    margin-top: 1em;
+    margin-bottom: 0.6em;
+}
+
+.dark .markdown h3 {
+    color: #84a3c7;
+}
+
+.markdown p {
+    text-align: justify;
+    text-justify: inter-ideograph;
+    margin-bottom: 1em;
+}
+
+.markdown blockquote {
+    border-left: 4px solid #b8860b;
+    background: #f8f6f0;
+    padding: 0.8em 1.2em;
+    margin: 1em 0;
+    border-radius: 0 4px 4px 0;
+    color: #4b5563;
+}
+
+.dark .markdown blockquote {
+    background: #1e293b;
+    color: #9a9a9a;
+}
+
+.markdown ul, .markdown ol {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.markdown li {
+    margin-bottom: 0.5em;
+}
+
+.markdown strong {
+    color: #1e3a5f;
+    font-weight: 600;
+}
+
+.dark .markdown strong {
+    color: #d4a843;
+}
+
+.markdown em {
+    color: #b8860b;
+}
+
+.markdown a {
+    color: #b8860b;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.markdown a:hover {
+    color: #d4a843;
+}
+
+.markdown hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 2em 0;
+}
+
+.dark .markdown hr {
+    border-top-color: #1e293b;
+}
+
+.markdown code {
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    background: #f1f5f9;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.dark .markdown code {
+    background: #0f172a;
+}
+
+.markdown pre {
+    background: #f1f5f9;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.dark .markdown pre {
+    background: #0f172a;
+}
+
+.markdown pre code {
+    background: none;
+    padding: 0;
+}
+
+.markdown img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 1em 0;
+}
+
+@media (max-width: 768px) {
+    .markdown {
+        font-size: 17px;
+    }
+    .markdown h1 {
+        font-size: 1.5em;
+    }
+    .markdown h2 {
+        font-size: 1.2em;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b8860b;
+}
