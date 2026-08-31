@@ -25,7 +25,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Pages
+        id: configure_pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
+        continue-on-error: true
+
+      - name: Verify Pages Enabled
+        if: steps.configure_pages.outcome == 'failure'
+        run: |
+          echo "::error::GitHub Pages is not enabled. Please go to Settings → Pages → Source → 'GitHub Actions' → Save"
+          echo "::error::URL: https://github.com/${{ github.repository }}/settings/pages"
+          exit 1
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
