@@ -54,9 +54,10 @@
                         <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"/></svg>
                         <svg x-show="dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </button>
-                    <button @click="openReader(0)"
+                    <button @click="lastRead ? resumeRead() : openReader(0)"
                             class="px-4 py-2 rounded-lg bg-navy-600 dark:bg-navy-400 text-white dark:text-navy-900 font-medium hover:bg-navy-700 dark:hover:bg-navy-300 transition">
-                        开始阅读
+                        <span x-show="!lastRead">开始阅读</span>
+                        <span x-show="lastRead">继续阅读</span>
                     </button>
                 </div>
             </div>
@@ -79,15 +80,21 @@
                         关于爱情、职场、亲情、自我，那些我们想说却不知如何开口的话，
                         都在这里找到了共鸣。全部收录，按编号排序，无一遗漏。
                     </p>
-                    <div class="flex gap-4 pt-4">
-                        <button @click="openReader(0)"
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <button @click="lastRead ? resumeRead() : openReader(0)"
                                 class="px-6 py-3 rounded-lg bg-navy-600 dark:bg-navy-400 text-white dark:text-navy-900 font-medium hover:bg-navy-700 dark:hover:bg-navy-300 transition shadow-lg shadow-navy-600/20">
-                            开始阅读
+                            <span x-show="!lastRead">开始阅读</span>
+                            <span x-show="lastRead">继续阅读</span>
                         </button>
                         <button @click="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})"
                                 class="px-6 py-3 rounded-lg border-2 border-navy-600 dark:border-navy-400 text-navy-600 dark:text-navy-400 font-medium hover:bg-navy-50 dark:hover:bg-navy-800 transition">
                             查看目录
                         </button>
+                    </div>
+                    <div x-show="lastRead" class="mt-4 px-4 py-3 rounded-lg bg-gold/10 border border-gold/30 text-sm flex flex-wrap items-center gap-2">
+                        <span class="text-gold font-medium">📖 上次阅读到：</span>
+                        <span class="text-ink dark:text-slate-300" x-text="'第 ' + lastRead.idx + ' 章 · ' + lastRead.title"></span>
+                        <button @click="resumeRead()" class="text-gold underline hover:text-gold-dark">点此继续</button>
                     </div>
                 </div>
                 <div class="flex justify-center">
@@ -247,6 +254,9 @@
                 </button>
                 <h2 class="font-serif font-bold text-navy-600 dark:text-navy-200 truncate" x-text="currentChapter ? currentChapter.title : ''"></h2>
                 <div class="flex items-center gap-2">
+                    <button @click="mdSidebarToggle()" class="hidden md:inline-flex p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition" :class="sidebarOpen ? 'text-gold' : ''" title="目录">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
                     <button @click="dark = !dark; localStorage.setItem('dark', dark)"
                             class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition">
                         <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"/></svg>
@@ -260,9 +270,13 @@
         </header>
 
         <div class="flex-1 flex max-w-6xl mx-auto w-full">
-            <aside class="hidden md:block w-64 flex-shrink-0 border-r border-slate-200 dark:border-navy-700 overflow-y-auto sticky top-16 h-[calc(100vh-4rem)] p-4">
+            <aside x-show="sidebarOpen" x-transition class="hidden md:block w-64 flex-shrink-0 border-r border-slate-200 dark:border-navy-700 overflow-y-auto sticky top-16 h-[calc(100vh-4rem)] p-4">
+                <div class="sticky top-0 bg-white dark:bg-navy-900 pb-2 mb-3 z-10">
+                    <input type="text" x-model="searchQuery" placeholder="🔍 搜索章节标题..."
+                           class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-navy-700 bg-slate-50 dark:bg-navy-800 focus:border-gold outline-none text-ink dark:text-slate-200">
+                </div>
                 <div class="space-y-4">
-                    <template x-for="part in parts" :key="part.name">
+                    <template x-for="part in filteredParts" :key="part.name">
                         <div>
                             <h4 class="font-serif text-sm font-bold text-gold mb-2" x-text="part.name"></h4>
                             <div class="space-y-1">
@@ -275,6 +289,9 @@
                             </div>
                         </div>
                     </template>
+                    <div x-show="searchQuery && filteredParts.length === 0" class="text-center text-sm text-ink-muted dark:text-slate-400 py-8">
+                        未找到匹配的章节
+                    </div>
                 </div>
             </aside>
 
@@ -304,14 +321,18 @@
 
     <div x-show="mobileMenu" @click="mobileMenu = false" class="fixed inset-0 bg-black/50 z-50 md:hidden" style="display: none;">
         <div @click.stop class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-navy-900 p-4 overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-3">
                 <h3 class="font-serif font-bold text-navy-600 dark:text-navy-200">目录</h3>
                 <button @click="mobileMenu = false" class="p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
+            <div class="mb-3">
+                <input type="text" x-model="searchQuery" placeholder="🔍 搜索章节标题..."
+                       class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-navy-700 bg-slate-50 dark:bg-navy-800 focus:border-gold outline-none text-ink dark:text-slate-200">
+            </div>
             <div class="space-y-4">
-                <template x-for="part in parts" :key="part.name">
+                <template x-for="part in filteredParts" :key="part.name">
                     <div>
                         <h4 class="font-serif text-sm font-bold text-gold mb-2" x-text="part.name"></h4>
                         <div class="space-y-1">
@@ -324,6 +345,9 @@
                         </div>
                     </div>
                 </template>
+                <div x-show="searchQuery && filteredParts.length === 0" class="text-center text-sm text-ink-muted dark:text-slate-400 py-8">
+                    未找到匹配的章节
+                </div>
             </div>
         </div>
     </div>
@@ -341,6 +365,10 @@
                 progress: 0,
                 chapterCache: {},
                 chapters: [],
+                searchQuery: '',
+                sidebarOpen: true,
+                lastRead: null,
+                _scrollToRestore: 0,
                 themes: [
                     { title: '情感篇', icon: '❤', desc: '关于爱情、暧昧、异地恋——那些纠结的心事，其实都有答案。', count: 249, color: 'bg-red-100 dark:bg-red-900/30' },
                     { title: '职场篇', icon: '💼', desc: '关于情商、赚钱、职场生存——成年人世界里最真实的规则。', count: 249, color: 'bg-blue-100 dark:bg-blue-900/30' },
@@ -354,7 +382,7 @@
                     '别扯了，这世上根本就没有怀才不遇。',
                     '你过得不好，因为你太听话了。',
                 ],
-                parts: {},
+                parts: [],
 
                 async init() {
                     try {
@@ -367,10 +395,15 @@
                             if (!grouped[ch.part]) grouped[ch.part] = [];
                             grouped[ch.part].push(ch);
                         });
-                        this.parts = grouped;
+                        this.parts = Object.keys(grouped).map(name => ({ name, chapters: grouped[name] }));
                     } catch (e) {
                         console.error('加载章节配置失败:', e);
                     }
+
+                    try {
+                        const saved = localStorage.getItem('lastRead');
+                        if (saved) this.lastRead = JSON.parse(saved);
+                    } catch (e) {}
 
                     const hash = window.location.hash;
                     if (hash.startsWith('#chapter-')) {
@@ -381,13 +414,24 @@
                     }
                 },
 
+                get filteredParts() {
+                    const q = this.searchQuery.trim().toLowerCase();
+                    if (!q) return this.parts;
+                    const result = [];
+                    this.parts.forEach(part => {
+                        const matched = part.chapters.filter(ch => ch.title.toLowerCase().includes(q));
+                        if (matched.length) result.push({ name: part.name, chapters: matched });
+                    });
+                    return result;
+                },
+
                 get currentChapter() {
                     return this.chapters[this.currentIdx] || null;
                 },
 
-                async openReader(idx) {
+                async openReader(idx, restoreScroll = false) {
                     this.view = 'read';
-                    await this.loadChapter(idx);
+                    await this.loadChapter(idx, restoreScroll);
                 },
 
                 closeReader() {
@@ -396,15 +440,21 @@
                     window.scrollTo(0, 0);
                 },
 
-                async loadChapter(idx) {
+                async loadChapter(idx, restoreScroll = false) {
                     if (idx < 0 || idx >= this.chapters.length) return;
                     this.currentIdx = idx;
                     const ch = this.chapters[idx];
                     window.location.hash = `chapter-${idx}`;
+                    this.saveLastRead(idx, ch.title);
 
                     if (this.chapterCache[idx]) {
                         this.renderedContent = this.chapterCache[idx];
-                        this.scrollToTop();
+                        if (restoreScroll && this._scrollToRestore) {
+                            this.restoreScrollPosition();
+                        } else {
+                            this.scrollToTop();
+                        }
+                        this.$nextTick(() => this.scrollSidebarToActive());
                         return;
                     }
 
@@ -420,7 +470,47 @@
                         this.renderedContent = '<p>章节加载失败，请稍后重试。</p>';
                     }
                     this.loading = false;
-                    this.scrollToTop();
+                    if (restoreScroll && this._scrollToRestore) {
+                        this.restoreScrollPosition();
+                    } else {
+                        this.scrollToTop();
+                    }
+                    this.$nextTick(() => this.scrollSidebarToActive());
+                },
+
+                saveLastRead(idx, title) {
+                    const data = { idx, title, scroll: this._scrollToRestore || 0 };
+                    this.lastRead = { idx, title };
+                    localStorage.setItem('lastRead', JSON.stringify(data));
+                },
+
+                resumeRead() {
+                    if (!this.lastRead) return;
+                    try {
+                        const saved = JSON.parse(localStorage.getItem('lastRead') || '{}');
+                        this._scrollToRestore = saved.scroll || 0;
+                    } catch (e) { this._scrollToRestore = 0; }
+                    this.openReader(this.lastRead.idx, true);
+                },
+
+                restoreScrollPosition() {
+                    const target = this._scrollToRestore;
+                    this._scrollToRestore = 0;
+                    this.$nextTick(() => {
+                        const main = document.querySelector('main');
+                        if (main) main.scrollTop = target;
+                    });
+                },
+
+                scrollSidebarToActive() {
+                    const aside = document.querySelector('aside');
+                    if (!aside) return;
+                    const active = aside.querySelector('button.bg-navy-600');
+                    if (active) active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                },
+
+                mdSidebarToggle() {
+                    this.sidebarOpen = !this.sidebarOpen;
                 },
 
                 async preloadChapter(idx) {
@@ -445,6 +535,14 @@
                     const el = e.target;
                     const max = el.scrollHeight - el.clientHeight;
                     this.progress = max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0;
+                    if (this.currentIdx >= 0 && this.chapters[this.currentIdx]) {
+                        localStorage.setItem('lastRead', JSON.stringify({
+                            idx: this.currentIdx,
+                            title: this.chapters[this.currentIdx].title,
+                            scroll: el.scrollTop
+                        }));
+                        this.lastRead = { idx: this.currentIdx, title: this.chapters[this.currentIdx].title };
+                    }
                 }
             }
         }
